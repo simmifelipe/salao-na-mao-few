@@ -1,20 +1,23 @@
 import React, { useEffect } from "react";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Drawer, Icon, Modal } from "rsuite";
+import { Button, Drawer, Icon, Modal, SelectPicker, TagPicker } from "rsuite";
 import Table from "../../components/Table";
 
 import {
   addColaborador,
   allColaboradores,
+  allServicos,
   filterColaboradores,
   unlinkColaborador,
   updateColaborador,
 } from "../../store/modules/colaborador/actions";
 
+import bancos from '../../data/bancos.json';
+
 const Colaboradores: React.FC = () => {
   const dispatch = useDispatch();
-  const { colaboradores, colaborador, behavior, form, components } =
+  const { colaboradores, colaborador, behavior, form, components, servicos } =
     useSelector((state: any) => state.colaborador);
 
   const setComponent = (component: any, state: any) => {
@@ -33,6 +36,18 @@ const Colaboradores: React.FC = () => {
     );
   };
 
+  const setContaBancaria = (key: string, value: any) => {
+    dispatch(
+      updateColaborador({
+        colaborador: {
+          ...colaborador, contaBancaria: {
+            ...colaborador.contaBancaria, [key]: value,
+          }
+        },
+      })
+    );
+  }
+
   const save = () => {
     dispatch(addColaborador());
   };
@@ -43,11 +58,12 @@ const Colaboradores: React.FC = () => {
 
   useEffect(() => {
     dispatch(allColaboradores());
+    dispatch(allServicos())
   }, [dispatch]);
 
   return (
     <div className="col p-5 overflow-auto h-100">
-      
+
       <Drawer
         show={components.drawer}
         size="sm"
@@ -69,16 +85,18 @@ const Colaboradores: React.FC = () => {
                   value={colaborador.email}
                   onChange={(e) => setColaborador("email", e.target.value)}
                 />
-                <div className="input-group-append">
-                  <Button
-                    appearance="primary"
-                    loading={form.filtering}
-                    disabled={form.filtering}
-                    onClick={() => dispatch(filterColaboradores())}
-                  >
-                    Pesquisar
-                  </Button>
-                </div>
+                {behavior === 'create' && (
+                  <div className="input-group-append">
+                    <Button
+                      appearance="primary"
+                      loading={form.filtering}
+                      disabled={form.filtering}
+                      onClick={() => dispatch(filterColaboradores())}
+                    >
+                      Pesquisar
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -87,14 +105,27 @@ const Colaboradores: React.FC = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Nomde do cliente"
+                placeholder="Nome do cliente"
                 disabled={form.disabled}
                 value={colaborador.nome}
                 onChange={(e) => setColaborador("nome", e.target.value)}
               />
             </div>
             <div className="form-group col-6 mb-3">
-              <b className="">Telefone</b>
+              <b className="">Status</b>
+              <select
+                className="form-control"
+                disabled={form.disabled && behavior === 'create'}
+                value={colaborador.status}
+                onChange={e => setColaborador('vinculo', e.target.value)}
+              >
+                <option value="A">Ativo</option>
+                <option value="I">Inativo</option>
+              </select>
+            </div>
+
+            <div className="form-group col-6 mb-3">
+              <b className="">Telefone / Whatsapp</b>
               <input
                 type="text"
                 className="form-control"
@@ -104,7 +135,6 @@ const Colaboradores: React.FC = () => {
                 onChange={(e) => setColaborador("telefone", e.target.value)}
               />
             </div>
-
             <div className="form-group col-6 mb-3">
               <b className="">Data de nascimento</b>
               <input
@@ -117,6 +147,7 @@ const Colaboradores: React.FC = () => {
                 }
               />
             </div>
+
             <div className="form-group col-6 mb-3">
               <b>Sexo</b>
               <select
@@ -129,23 +160,128 @@ const Colaboradores: React.FC = () => {
                 <option value="F">Feminino</option>
               </select>
             </div>
+
+            <div className="col-12 mb-3">
+              <b className="">Especialidades</b>
+              <TagPicker
+                size="lg"
+                block
+                data={servicos}
+                disabled={form.disabled && behavior === 'create'}
+                value={colaborador.especialidades}
+                onChange={especialidade => setColaborador('especialidades', especialidade)}
+              />
+            </div>
+
+            <div className="row">
+
+              <div className="form-group col-6 mb-3">
+                <b className="">Titular da conta</b>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Nome do titular da conta"
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.titular}
+                  onChange={(e) => setContaBancaria("titular", e.target.value)}
+                />
+              </div>
+              <div className="form-group col-6 mb-3">
+                <b className="">CPF/CNPJ</b>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="CPF/CNPJ do titular"
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.cpfCnpj}
+                  onChange={(e) => setContaBancaria("cpfCnpj", e.target.value)}
+                />
+              </div>
+
+              <div className="form-group col-6 mb-3">
+                <b className="">Banco</b>
+                <SelectPicker
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.banco}
+                  onChange={banco => setContaBancaria('banco', banco)}
+                  data={bancos}
+                  size="lg"
+                  block
+                />
+              </div>
+              <div className="form-group col-6 mb-3">
+                <b>Tipo de conta</b>
+                <select
+                  className="form-control"
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.tipo}
+                  onChange={(e) => setContaBancaria("tipo", e.target.value)}
+                >
+                  <option value="conta_corrente">Conta Corrente</option>
+                  <option value="conta_poupanca">Conta Poupança</option>
+                </select>
+              </div>
+
+              <div className="form-group col-6 mb-3">
+                <b className="">Agência</b>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Agência"
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.agencia}
+                  onChange={(e) => setContaBancaria("agencia", e.target.value)}
+                />
+              </div>
+
+              <div className="form-group col-6 mb-3">
+                <b className="">Número da conta</b>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Número da conta"
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.numero}
+                  onChange={(e) => setContaBancaria("numero", e.target.value)}
+                />
+              </div>
+
+              <div className="form-group col-6 mb-3">
+                <b className="">Dígito</b>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="DV"
+                  disabled={form.disabled}
+                  value={colaborador.contaBancaria.dv}
+                  onChange={(e) => setContaBancaria("dv", e.target.value)}
+                />
+              </div>
+            </div>
           </div>
           <Button
-            block
-            className="btn-lg mt-3"
-            color={behavior === "create" ? "green" : "red"}
-            size="lg"
             loading={form.saving}
-            onClick={() => {
-              if (behavior === "create") {
-                save();
-              } else {
-                setComponent("confirmDelete", true);
-              }
-            }}
+            color={behavior === "create" ? "green" : "blue"}
+            size="lg"
+            block
+            className="mt-3"
+            onClick={() => save()}
           >
-            {behavior === "create" ? "Salvar" : "Remover"} Cliente
+            {behavior === "create" ? "Salvar" : "Atualizar"} Colaborador
           </Button>
+          {behavior === 'update' && (
+            <Button
+              loading={form.saving}
+              color="red"
+              size="lg"
+              block
+              className="mt-1"
+              onClick={() => setComponent('confirmDelete', true)}
+            >
+              Remover Colaborador
+            </Button>
+          )}
+
         </Drawer.Body>
       </Drawer>
 
@@ -180,7 +316,7 @@ const Colaboradores: React.FC = () => {
       <div className="row">
         <div className="col-12">
           <div className="w-100 d-flex justify-content-between">
-            <h2 className="mb-4 mt-0">Clientes</h2>
+            <h2 className="mb-4 mt-0">Colaboradores</h2>
             <div>
               <button
                 className="btn btn-primary btn-lg"
@@ -193,7 +329,7 @@ const Colaboradores: React.FC = () => {
                   setComponent("drawer", true);
                 }}
               >
-                <span className="mdi mdi-plus">Novo Cliente</span>
+                <span className="mdi mdi-plus">Novo Colaborador</span>
               </button>
             </div>
           </div>
@@ -207,23 +343,23 @@ const Colaboradores: React.FC = () => {
               { label: "Telefone", key: "telefone", width: 200 },
               {
                 label: "Sexo",
-                content: (cliente: any) =>
-                  cliente.sexo === "M" ? "Masculino" : "Feminino",
+                content: (colaborador: any) =>
+                  colaborador.sexo === "M" ? "Masculino" : "Feminino",
                 width: 200,
               },
               {
                 label: "Data Cadastro",
-                content: (cliente: any) =>
-                  moment(cliente.dataCadastro).format("DD/MM/YYYY"),
+                content: (colaborador: any) =>
+                  moment(colaborador.dataCadastro).format("DD/MM/YYYY"),
                 width: 200,
               },
             ]}
-            actions={(cliente) => (
+            actions={(colaborador) => (
               <Button color="blue" size="xs">
                 Ver informações
               </Button>
             )}
-            onRowClick={(cliente) => {
+            onRowClick={(colaborador) => {
               dispatch(
                 updateColaborador({
                   behavior: "update",
@@ -232,7 +368,7 @@ const Colaboradores: React.FC = () => {
               setComponent("drawer", true);
               dispatch(
                 updateColaborador({
-                  cliente,
+                  colaborador,
                 })
               );
             }}

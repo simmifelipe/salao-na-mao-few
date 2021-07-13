@@ -70,16 +70,18 @@ const Clientes: React.FC = () => {
                   value={cliente.email}
                   onChange={(e) => setCliente("email", e.target.value)}
                 />
-                <div className="input-group-append">
-                  <Button
-                    appearance="primary"
-                    loading={form.filtering}
-                    disabled={form.filtering}
-                    onClick={() => dispatch(filterClientes())}
-                  >
-                    Pesquisar
-                  </Button>
-                </div>
+                {behavior === 'create' && (
+                  <div className="input-group-append">
+                    <Button
+                      appearance="primary"
+                      loading={form.filtering}
+                      disabled={form.filtering}
+                      onClick={() => dispatch(filterClientes())}
+                    >
+                      Pesquisar
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 

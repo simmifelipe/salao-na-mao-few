@@ -26,6 +26,12 @@ const Sidebar: React.FC<RouteComponentProps> = ({ location }) => {
             <label>Colaboradores</label>
           </Link>
         </li>
+        <li>
+          <Link to="/servicos" className={location.pathname === '/servicos' ? 'active' : ''}>
+            <span className="mdi mdi-auto-fix"></span>
+            <label>Servicos</label>
+          </Link>
+        </li>
       </ul>
     </aside>
   )

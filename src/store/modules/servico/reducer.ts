@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { produce } from 'immer';
 import types from './types';
 
@@ -12,39 +13,30 @@ const INITIAL_STATE = {
     disabled: true,
     saving: false,
   },
-  colaboradores: [],
   servicos: [],
-  colaborador: {
-    email: '',
-    nome: '',
-    telefone: '',
-    dataNascimento: '',
-    sexo: 'M',
-    vinculo: 'A',
-    especialidades: [],
-    contaBancaria: {
-      titular: '',
-      cpfCnpj: '',
-      banco: '',
-      tipo: 'conta_corrente',
-      agencia: '',
-      numero: '',
-      dv: '',
-    },
+  servico: {
+    titulo: '',
+    preco: '',
+    comissao: '',
+    duracao: moment('00:30', 'HH:mm').format(),
+    recorrencia: '',
+    descricao: '',
+    status: 'A',
+    arquivos: [],
   },
 }
 
-function colaborador(state = INITIAL_STATE, action: any) {
+function servico(state = INITIAL_STATE, action: any) {
   switch (action.type) {
-    case types.UPDATE_COLABORADOR: {
+    case types.UPDATE_SERVICO: {
       return produce(state, draft => {
         draft = { ...draft, ...action.payload }
         return draft;
       })
     }
-    case types.RESET_COLABORADOR: {
+    case types.RESET_SERVICO: {
       return produce(state, draft => {
-        draft.colaborador = INITIAL_STATE.colaborador;
+        draft.servico = INITIAL_STATE.servico;
         return draft;
       })
     }
@@ -54,4 +46,4 @@ function colaborador(state = INITIAL_STATE, action: any) {
   }
 }
 
-export default colaborador;
+export default servico;

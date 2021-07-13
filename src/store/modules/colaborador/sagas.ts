@@ -72,16 +72,28 @@ export function* filterColaboradores() {
 }
 
 export function* addColaborador() {
-  const { form, colaborador, components } = yield select(
+  const { form, colaborador, components, behavior } = yield select(
     (state) => state.colaborador
   );
 
   try {
     yield put(updateColaborador({ form: { ...form, saving: true } }));
-    const { data: res } = yield call(api.post, `/colaborador`, {
-      salaoId: consts.salaoId,
-      colaborador,
-    });
+    let res: any = {};
+
+    if (behavior === 'create') {
+      const { data } = yield call(api.post, `/colaborador`, {
+        salaoId: consts.salaoId,
+        colaborador,
+      });
+      res = data;
+    } else {
+      const { data } = yield call(api.put, `/colaborador/${colaborador._id}`, {
+        vinculo: colaborador.vinculo,
+        vinculoId: colaborador.vinculoId,
+        especialidades: colaborador.especialidades,
+      });
+      res = data;
+    }
 
     yield put(updateColaborador({ form: { ...form, saving: false } }));
     if (res.error) {
@@ -140,7 +152,7 @@ export function* allServicos() {
   const { form } = yield select((state) => state.colaborador);
 
   try {
-    updateColaborador({ form: { ...form, filtering: true } });
+    yield put(updateColaborador({ form: { ...form, filtering: true } }));
     const { data: res } = yield call(
       api.get,
       `/salao/servicos/${consts.salaoId}`
@@ -153,9 +165,9 @@ export function* allServicos() {
       return false;
     }
 
-    updateColaborador({ servicos: [res.servicos] });
+    yield put(updateColaborador({ servicos: res.servicos }));
   } catch (err) {
-    updateColaborador({ form: { ...form, filtering: false } });
+    yield put(updateColaborador({ form: { ...form, filtering: false } }));
     alert(err.message);
   }
 }
