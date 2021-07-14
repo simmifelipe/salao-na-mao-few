@@ -15,7 +15,8 @@ export function updateServico(payload: any) {
 
 export function removeArquivo(key: any) {
   return {
-    type: types.REMOVE_ARQUIVO
+    type: types.REMOVE_ARQUIVO,
+    key
   }
 }
 
