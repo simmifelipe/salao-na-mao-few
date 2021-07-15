@@ -7,9 +7,7 @@ import {
   Drawer,
   Icon,
   Modal,
-  SelectPicker,
   Tag,
-  TagPicker,
   Uploader,
 } from "rsuite";
 import Table from "../../components/Table";

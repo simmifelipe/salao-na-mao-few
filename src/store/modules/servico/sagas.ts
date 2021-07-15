@@ -47,9 +47,11 @@ export function* addServico() {
       JSON.stringify({ ...servico, salaoId: consts.salaoId })
     );
     formData.append("salaoId", consts.salaoId);
-    servico.arquivos.map((a: any, i: number) => {
-      formData.append(`arquivo_${i}`, a);
-    });
+
+    for (let i = 0; i < servico.arquivos.length; i++) {
+      const arquivo = servico.arquivos[i];
+      formData.append(`arquivo_${i}`, arquivo);
+    }
 
     const { data: res } = yield call(
       api[behavior === "create" ? "post" : "put"],
