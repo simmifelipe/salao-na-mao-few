@@ -1,21 +1,34 @@
 import React, { useEffect } from "react";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, DatePicker, Drawer, Icon, Modal, SelectPicker, Tag, TagPicker, Uploader } from "rsuite";
+import {
+  Button,
+  DatePicker,
+  Drawer,
+  Icon,
+  Modal,
+  SelectPicker,
+  Tag,
+  TagPicker,
+  Uploader,
+} from "rsuite";
 import Table from "../../components/Table";
 
 import {
   addServico,
   allServicos,
   removeArquivo,
+  removeServico,
+  resetServico,
   updateServico,
 } from "../../store/modules/servico/actions";
 import consts from "../../consts";
 
 const Servicos: React.FC = () => {
   const dispatch = useDispatch();
-  const { servicos, servico, behavior, form, components } =
-    useSelector((state: any) => state.servico);
+  const { servicos, servico, behavior, form, components } = useSelector(
+    (state: any) => state.servico
+  );
 
   const setComponent = (component: any, state: any) => {
     dispatch(
@@ -38,7 +51,7 @@ const Servicos: React.FC = () => {
   };
 
   const remove = () => {
-
+    dispatch(removeServico());
   };
 
   useEffect(() => {
@@ -47,17 +60,13 @@ const Servicos: React.FC = () => {
 
   return (
     <div className="col p-5 overflow-auto h-100">
-
-
       <Drawer
         show={components.drawer}
         size="sm"
         onHide={() => setComponent("drawer", false)}
       >
         <Drawer.Body>
-          <h3>
-            {behavior === "create" ? "Criar novo" : "Atualizar"} servico
-          </h3>
+          <h3>{behavior === "create" ? "Criar novo" : "Atualizar"} servico</h3>
           <div className="row mt-3">
             <div className="form-group col-6 mb-3">
               <b className="">Título</b>
@@ -107,9 +116,9 @@ const Servicos: React.FC = () => {
                 block
                 format="HH:mm"
                 value={servico.duracao}
-                hideMinutes={min => ![0, 30].includes(min)}
-                onChange={e => {
-                  setServico('duracao', e);
+                hideMinutes={(min) => ![0, 30].includes(min)}
+                onChange={(e) => {
+                  setServico("duracao", e);
                 }}
               />
             </div>
@@ -118,7 +127,7 @@ const Servicos: React.FC = () => {
               <select
                 className="form-control"
                 value={servico.status}
-                onChange={e => setServico('status', e.target.value)}
+                onChange={(e) => setServico("status", e.target.value)}
               >
                 <option value="A">Ativo</option>
                 <option value="I">Inativo</option>
@@ -132,7 +141,7 @@ const Servicos: React.FC = () => {
                 className="form-control"
                 placeholder="Descrição do serviço..."
                 value={servico.descricao}
-                onChange={e => setServico('descricao', e.target.value)}
+                onChange={(e) => setServico("descricao", e.target.value)}
               ></textarea>
             </div>
 
@@ -142,19 +151,23 @@ const Servicos: React.FC = () => {
                 multiple
                 autoUpload={false}
                 listType="picture"
-                defaultFileList={servico.arquivos.map((servico: any, index: any) => ({
-                  name: servico?.caminho,
-                  fileKey: index,
-                  url: `${consts.bucketUrl}/${servico.caminho}`
-                }))}
-                onChange={files => {
-                  const arquivos = files.filter(f => f.blobFile).map(f => f.blobFile);
+                defaultFileList={servico.arquivos.map(
+                  (servico: any, index: any) => ({
+                    name: servico?.caminho,
+                    fileKey: index,
+                    url: `${consts.bucketUrl}/${servico.caminho}`,
+                  })
+                )}
+                onChange={(files) => {
+                  const arquivos = files
+                    .filter((f) => f.blobFile)
+                    .map((f) => f.blobFile);
 
-                  setServico('arquivos', arquivos);
+                  setServico("arquivos", arquivos);
                 }}
-                onRemove={file => {
-                  if (behavior === 'update' && file.url) {
-                    dispatch(removeArquivo(file.name))
+                onRemove={(file) => {
+                  if (behavior === "update" && file.url) {
+                    dispatch(removeArquivo(file.name));
                   }
                 }}
               >
@@ -175,19 +188,18 @@ const Servicos: React.FC = () => {
           >
             {behavior === "create" ? "Salvar" : "Atualizar"} Servico
           </Button>
-          {behavior === 'update' && (
+          {behavior === "update" && (
             <Button
               loading={form.saving}
               color="red"
               size="lg"
               block
               className="mt-1"
-              onClick={() => setComponent('confirmDelete', true)}
+              onClick={() => setComponent("confirmDelete", true)}
             >
               Remover Servico
             </Button>
           )}
-
         </Drawer.Body>
       </Drawer>
 
@@ -207,7 +219,7 @@ const Servicos: React.FC = () => {
           {"  "} Tem certeza que deseja excluir? Essa ação será irreversível!
         </Modal.Body>
         <Modal.Footer>
-          <Button loading={form.saving} onClick={() => remove()} color="red">
+          <Button loading={form.saving} onClick={remove} color="red">
             Sim, tenho certeza!
           </Button>
           <Button
@@ -227,6 +239,7 @@ const Servicos: React.FC = () => {
               <button
                 className="btn btn-primary btn-lg"
                 onClick={() => {
+                  dispatch(resetServico());
                   dispatch(
                     updateServico({
                       behavior: "create",
@@ -245,38 +258,39 @@ const Servicos: React.FC = () => {
             data={servicos}
             config={[
               {
-                label: 'Titulo',
-                key: 'titulo',
+                label: "Titulo",
+                key: "titulo",
                 sortable: true,
                 fixed: true,
                 width: 200,
               },
               {
-                label: 'Preço',
-                key: 'preco',
+                label: "Preço",
+                key: "preco",
                 content: (servico: any) => `R$ ${servico.preco.toFixed(2)}`,
               },
               {
-                label: 'Comissão',
-                key: 'comissao',
-                content: (servico: any) => `R$ ${servico.comissao}%`,
+                label: "Comissão",
+                key: "comissao",
+                content: (servico: any) => `${servico.comissao}%`,
               },
               {
-                label: 'Recorrência (dias)',
-                key: 'recorrencia',
-                content: (servico: any) => `R$ ${servico.recorrencia}%`,
+                label: "Recorrência (dias)",
+                key: "recorrencia",
+                content: (servico: any) => `${servico.recorrencia}`,
               },
               {
-                label: 'Duração',
-                key: 'duracao',
-                content: (servico: any) => moment(servico.duracao).format('HH:mm'),
+                label: "Duração",
+                key: "duracao",
+                content: (servico: any) =>
+                  moment(servico.duracao).format("HH:mm"),
               },
               {
-                label: 'Status',
-                key: 'status',
+                label: "Status",
+                key: "status",
                 content: (servico: any) => (
-                  <Tag color={servico.status === 'A' ? 'green' : 'red'}>
-                    {servico.status === 'A' ? 'Ativo' : 'Inativo'}
+                  <Tag color={servico.status === "A" ? "green" : "red"}>
+                    {servico.status === "A" ? "Ativo" : "Inativo"}
                   </Tag>
                 ),
               },

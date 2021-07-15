@@ -5,7 +5,7 @@ import api from "../../../services/api";
 import {
   updateServico,
   allServicos as allServicosAction,
-  resetServico
+  resetServico,
 } from "./actions";
 
 import consts from "../../../consts";
@@ -40,22 +40,22 @@ export function* addServico() {
 
   try {
     yield put(updateServico({ form: { ...form, saving: true } }));
-    let res: any = {};
 
-    if (behavior === 'create') {
-      const { data } = yield call(api.post, `/servico`, {
-        salaoId: consts.salaoId,
-        servico,
-      });
-      res = data;
-    } else {
-      const { data } = yield call(api.put, `/servico/${servico._id}`, {
-        vinculo: servico.vinculo,
-        vinculoId: servico.vinculoId,
-        especialidades: servico.especialidades,
-      });
-      res = data;
-    }
+    const formData = new FormData();
+    formData.append(
+      "servico",
+      JSON.stringify({ ...servico, salaoId: consts.salaoId })
+    );
+    formData.append("salaoId", consts.salaoId);
+    servico.arquivos.map((a: any, i: number) => {
+      formData.append(`arquivo_${i}`, a);
+    });
+
+    const { data: res } = yield call(
+      api[behavior === "create" ? "post" : "put"],
+      behavior === "create" ? `/servico` : `/servico/${servico._id}`,
+      formData
+    );
 
     yield put(updateServico({ form: { ...form, saving: false } }));
     if (res.error) {
@@ -64,9 +64,7 @@ export function* addServico() {
     }
 
     yield put(allServicosAction());
-    yield put(
-      updateServico({ components: { ...components, drawer: false } })
-    );
+    yield put(updateServico({ components: { ...components, drawer: false } }));
     yield put(resetServico());
   } catch (err) {
     updateServico({ form: { ...form, saving: false } });
@@ -75,16 +73,11 @@ export function* addServico() {
 }
 
 export function* removeServico() {
-  const { form, colaborador, components } = yield select(
-    (state) => state.colaborador
-  );
+  const { form, servico, components } = yield select((state) => state.servico);
 
   try {
     yield put(updateServico({ form: { ...form, saving: true } }));
-    const { data: res } = yield call(
-      api.delete,
-      `/colaborador/vinculo/${colaborador.vinculoId}`
-    );
+    const { data: res } = yield call(api.delete, `/servico/${servico._id}`);
 
     yield put(
       updateServico({
@@ -111,16 +104,13 @@ export function* removeServico() {
 }
 
 export function* removeArquivo({ key }: any) {
-  const { form } = yield select(
-    (state) => state.servico
-  );
+  const { form } = yield select((state) => state.servico);
 
   try {
     yield put(updateServico({ form: { ...form, saving: true } }));
-    const { data: res } = yield call(
-      api.delete,
-      `/servico/delete-arquivo/${key}`
-    );
+    const { data: res } = yield call(api.post, `/servico/delete-arquivo`, {
+      key,
+    });
 
     yield put(
       updateServico({
@@ -131,7 +121,6 @@ export function* removeArquivo({ key }: any) {
       alert(res.message);
       return false;
     }
-
   } catch (err) {
     updateServico({ form: { ...form, saving: false } });
     alert(err.message);

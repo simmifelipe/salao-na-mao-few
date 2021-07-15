@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import React from "react";
+import { Link, RouteComponentProps, withRouter } from "react-router-dom";
 
-import logo from '../../assets/logo.png';
+import logo from "../../assets/logo.png";
 
 const Sidebar: React.FC<RouteComponentProps> = ({ location }) => {
   return (
@@ -9,32 +9,50 @@ const Sidebar: React.FC<RouteComponentProps> = ({ location }) => {
       <img src={logo} alt="Logo" className="img-fluid px-3 py-4" />
       <ul className="p-0 m-0">
         <li>
-          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+          <Link to="/" className={location.pathname === "/" ? "active" : ""}>
             <span className="mdi mdi-calendar-check"></span>
             <label>Agendamentos</label>
           </Link>
         </li>
         <li>
-          <Link to="/clientes" className={location.pathname === '/clientes' ? 'active' : ''}>
+          <Link
+            to="/clientes"
+            className={location.pathname === "/clientes" ? "active" : ""}
+          >
             <span className="mdi mdi-account-multiple"></span>
             <label>Clientes</label>
           </Link>
         </li>
         <li>
-          <Link to="/colaboradores" className={location.pathname === '/colaboradores' ? 'active' : ''}>
+          <Link
+            to="/colaboradores"
+            className={location.pathname === "/colaboradores" ? "active" : ""}
+          >
             <span className="mdi mdi-card-account-details-outline"></span>
             <label>Colaboradores</label>
           </Link>
         </li>
         <li>
-          <Link to="/servicos" className={location.pathname === '/servicos' ? 'active' : ''}>
+          <Link
+            to="/servicos"
+            className={location.pathname === "/servicos" ? "active" : ""}
+          >
             <span className="mdi mdi-auto-fix"></span>
             <label>Servicos</label>
           </Link>
         </li>
+        <li>
+          <Link
+            to="/horarios"
+            className={location.pathname === "/horarios" ? "active" : ""}
+          >
+            <span className="mdi mdi-clock-check-outline"></span>
+            <label>Horários</label>
+          </Link>
+        </li>
       </ul>
     </aside>
-  )
-}
+  );
+};
 
 export default withRouter(Sidebar);
